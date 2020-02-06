@@ -53,6 +53,17 @@ def retrieveData():
         fileobj.close()
         return (rows, cols, start_point, goal_point, maze)
 
+#Find path taken to reach goal during BFS
+def findPath(maze, queue):
+    for obj in queue:
+        maze[obj.x][obj.y] = '*'
+
+def printResults(rows, cols, maze):
+    for i in range(rows):
+        for j in range(cols):
+            print(maze[rows-i-1][j], end=" ")
+        print('\n')
+
 # Printing result
 def printResults(rows, cols, maze, visitedGoalPoint, cost):
     if (visitedGoalPoint == True):
@@ -63,11 +74,11 @@ def printResults(rows, cols, maze, visitedGoalPoint, cost):
             print('\n')
     else:
         print("Failure! Path not found from start point to goal.")
+    
     print("Total cost = ", cost)
 
 #successor function generation, generates valid points
-def successorFunction(rows, cols, element, goal_point, maze, visited):
-    
+def successorFunction(rows, cols, element, goal_point, maze, visited): 
     vertex = element
     ls = []
     if (vertex.x + 1 < rows and visited[vertex.x + 1][vertex.y] == False and maze[vertex.x+1][vertex.y] == 0):
@@ -88,24 +99,33 @@ def BFS(rows, cols, start_point, goal_point, maze):
     #visited.append(node)
     visited[start_point.x][start_point.y] = True
 
+
     #queue.append(node)
-    pt = Point(start_point.x, start_point.y)
-    queue.append(pt)
+    queue.append(Point(start_point.x, start_point.y))
     
+    goal_found = False
     
     while queue:
-        element = queue.pop(0) 
+        element = queue.pop(0)
         if (element == goal_point):
             #found
-            print("Found goal!")
+            goal_found = True
+            #findPath(maze, queue) ##TRACE PATH TAKEN FIX
+            printResults(rows, cols, maze, True, 0)
+            print("Goal found!")
             break
         
-        (valid_moves) = successorFunction(rows, cols, element, goal_point, maze, visited) ##FIX
+        #visited[element.x][element.y] = True
+        
+        (valid_moves) = successorFunction(rows, cols, element, goal_point, maze, visited)
 
         for obj in valid_moves:
             visited[obj.x][obj.y] = True
-            pt = Point(obj.x, obj.y)
-            queue.append(pt)
+            queue.append(Point(obj.x, obj.y))
+
+    #search ended, goal not found    
+    if (goal_found == False):
+        print("Goal not found!")
 
 
 # Function to find a path to goal using Depth-First Search
