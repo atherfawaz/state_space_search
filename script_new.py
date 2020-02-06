@@ -56,7 +56,6 @@ def retrieveData():
         return (rows, cols, start_point, goal_point, maze)
 
 
-
 # Find path taken to reach goal during BFS
 def findPath(maze, path):
     for obj in path:
@@ -67,34 +66,34 @@ def findPath(maze, path):
 
 # Takes a path and computes its cost
 def computeCost(path, start_point):
-    
+
     cost = 0
     init_point = start_point
 
-    for i in range (0, len(path)):
+    for i in range(0, len(path)):
         curr_point = path.pop(0)
         if ((init_point.x - curr_point.x == 0) or (init_point.y - curr_point.y == 0)):
             #up or right
             cost += 2
         else:
-            #diagonally up
+            # diagonally up
             cost += 3
         init_point = curr_point
-    
+
     return cost
+
 
 def printResults(rows, cols, maze, visitedGoalPoint, cost):
     if (visitedGoalPoint == True):
         maze[goal_point.x][goal_point.y] = 'G'
         for i in range(rows):
             for j in range(cols):
-                print(maze[rows-i-1][j], end = "     ")
+                print(maze[rows-i-1][j], end="     ")
             print('\n')
     else:
         print("Failure! Path not found from start point to goal.")
 
     print("Total cost = ", cost)
-
 
 
 # successor function generation, generates valid points
@@ -114,7 +113,7 @@ def successorFunction(rows, cols, element, goal_point, maze, visited):
 
 
 def BFS(rows, cols, start_point, goal_point, maze):
-    
+
     visited = [[False]*cols for _ in range(rows)]
     queue = []
     path = []
@@ -129,7 +128,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
         node = elementary_path[-1]
 
         if (node == goal_point):
-            #goal found
+            # goal found
             goal_found = True
             findPath(maze, elementary_path)
             cost = computeCost(elementary_path, start_point)
@@ -138,7 +137,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
 
         visited[node.x][node.y] = True
 
-        #generate possible positions
+        # generate possible positions
         (valid_moves) = successorFunction(
             rows, cols, node, goal_point, maze, visited)
 
