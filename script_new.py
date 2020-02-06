@@ -61,15 +61,8 @@ def retrieveData():
 def findPath(maze, path):
     for obj in path:
         maze[obj.x][obj.y] = '*'
-
-
-def printResults(rows, cols, maze):
-    for i in range(rows):
-        for j in range(cols):
-            print(maze[rows-i-1][j], end=" ")
-        print('\n')
-
-# Printing result
+    start = path.pop(0)
+    maze[start.x][start.y] = 'S'
 
 
 def printResults(rows, cols, maze, visitedGoalPoint, cost):
@@ -77,7 +70,7 @@ def printResults(rows, cols, maze, visitedGoalPoint, cost):
         maze[goal_point.x][goal_point.y] = 'G'
         for i in range(rows):
             for j in range(cols):
-                print(maze[rows-i-1][j], end=" ")
+                print(maze[rows-i-1][j], end = "     ")
             print('\n')
     else:
         print("Failure! Path not found from start point to goal.")
@@ -88,7 +81,7 @@ def printResults(rows, cols, maze, visitedGoalPoint, cost):
 
 
 def successorFunction(rows, cols, element, goal_point, maze, visited):
-    vertex = element #really no need for this lol
+    vertex = element  # really no need for this lol
     ls = []
     if (vertex.x + 1 < rows and visited[vertex.x + 1][vertex.y] == False and maze[vertex.x+1][vertex.y] == 0):
         # valid
@@ -106,35 +99,34 @@ def BFS(rows, cols, start_point, goal_point, maze):
     visited = [[False]*cols for _ in range(rows)]
     queue = []
     path = []
+    parent = {}
     visited[start_point.x][start_point.y] = True
-    queue.append(Point(start_point.x, start_point.y))
+
+    queue.append([Point(start_point.x, start_point.y)])
+
     goal_found = False
-    counter = 0
 
     while queue:
-        counter = counter + 1
-        element = queue.pop(0)
-        if (element == goal_point):
-            # found
+
+        elementary_path = queue.pop(0)
+        node = elementary_path[-1]
+
+        if (node == goal_point):
+            # return path
             goal_found = True
-            findPath(maze, path) ##TRACE PATH TAKEN FIX
+            findPath(maze, elementary_path)
             printResults(rows, cols, maze, True, 0)
-            print("Goal found!")
             break
 
-        visited[element.x][element.y] = True
+        visited[node.x][node.y] = True
 
         (valid_moves) = successorFunction(
-            rows, cols, element, goal_point, maze, visited)
-
-        #no valid moves, this means we backtrack?
-        if (len(valid_moves) == 0):
-            path.append(element)
-            print("Backtracknow")
+            rows, cols, node, goal_point, maze, visited)
 
         for obj in valid_moves:
-            visited[obj.x][obj.y] = True
-            queue.append(Point(obj.x, obj.y))
+            new_path = list(elementary_path)
+            new_path.append(obj)
+            queue.append(new_path)
 
     # search ended, goal not found
     if (goal_found == False):
