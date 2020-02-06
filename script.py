@@ -1,6 +1,8 @@
 # State Space Search
 
 # Point class to store coordinates of states
+
+
 class Point:
     x = -1
     y = -1
@@ -8,8 +10,8 @@ class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-    
-    def __eq__(self, other): 
+
+    def __eq__(self, other):
         if not isinstance(other, Point):
             # don't attempt to compare against unrelated types
             return NotImplemented
@@ -53,10 +55,13 @@ def retrieveData():
         fileobj.close()
         return (rows, cols, start_point, goal_point, maze)
 
-#Find path taken to reach goal during BFS
+# Find path taken to reach goal during BFS
+
+
 def findPath(maze, queue):
     for obj in queue:
         maze[obj.x][obj.y] = '*'
+
 
 def printResults(rows, cols, maze):
     for i in range(rows):
@@ -65,6 +70,8 @@ def printResults(rows, cols, maze):
         print('\n')
 
 # Printing result
+
+
 def printResults(rows, cols, maze, visitedGoalPoint, cost):
     if (visitedGoalPoint == True):
         maze[goal_point.x][goal_point.y] = 'G'
@@ -74,56 +81,56 @@ def printResults(rows, cols, maze, visitedGoalPoint, cost):
             print('\n')
     else:
         print("Failure! Path not found from start point to goal.")
-    
+
     print("Total cost = ", cost)
 
-#successor function generation, generates valid points
-def successorFunction(rows, cols, element, goal_point, maze, visited): 
+# successor function generation, generates valid points
+
+
+def successorFunction(rows, cols, element, goal_point, maze, visited):
     vertex = element
     ls = []
     if (vertex.x + 1 < rows and visited[vertex.x + 1][vertex.y] == False and maze[vertex.x+1][vertex.y] == 0):
-        #valid
+        # valid
         ls.append(Point(vertex.x + 1, vertex.y))
     if (vertex.y + 1 < cols and visited[vertex.x][vertex.y + 1] == False and maze[vertex.x][vertex.y + 1] == 0):
-        #valid
+        # valid
         ls.append(Point(vertex.x, vertex.y + 1))
     if (vertex.x + 1 < rows and vertex.y + 1 < cols and visited[vertex.x + 1][vertex.y + 1] == False and maze[vertex.x + 1][vertex.y + 1] == 0):
-        #valid
+        # valid
         ls.append(Point(vertex.x + 1, vertex.y + 1))
     return(ls)
+
 
 def BFS(rows, cols, start_point, goal_point, maze):
     visited = [[False]*cols for _ in range(rows)]
     queue = []
-    
-    #visited.append(node)
     visited[start_point.x][start_point.y] = True
-
-
-    #queue.append(node)
     queue.append(Point(start_point.x, start_point.y))
-    
     goal_found = False
+    counter = 0
     
     while queue:
+        counter = counter + 1
         element = queue.pop(0)
         if (element == goal_point):
-            #found
+            # found
             goal_found = True
-            #findPath(maze, queue) ##TRACE PATH TAKEN FIX
-            printResults(rows, cols, maze, True, 0)
+            # findPath(maze, queue) ##TRACE PATH TAKEN FIX
+            #printResults(rows, cols, maze, True, 0)
             print("Goal found!")
             break
-        
-        #visited[element.x][element.y] = True
-        
-        (valid_moves) = successorFunction(rows, cols, element, goal_point, maze, visited)
+
+        visited[element.x][element.y] = True
+
+        (valid_moves) = successorFunction(
+            rows, cols, element, goal_point, maze, visited)
 
         for obj in valid_moves:
             visited[obj.x][obj.y] = True
             queue.append(Point(obj.x, obj.y))
 
-    #search ended, goal not found    
+    # search ended, goal not found
     if (goal_found == False):
         print("Goal not found!")
 
@@ -172,6 +179,7 @@ def DFS(rows, cols, start_point, goal_point, maze):
             stack = stack[:-1]
 
     return (maze, visited[goal_point.x][goal_point.y], cost)
+
 
 # main program
 (rows, cols, start_point, goal_point, maze) = retrieveData()
