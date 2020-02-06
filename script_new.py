@@ -55,15 +55,33 @@ def retrieveData():
         fileobj.close()
         return (rows, cols, start_point, goal_point, maze)
 
+
+
 # Find path taken to reach goal during BFS
-
-
 def findPath(maze, path):
     for obj in path:
         maze[obj.x][obj.y] = '*'
     start = path.pop(0)
     maze[start.x][start.y] = 'S'
 
+
+# Takes a path and computes its cost
+def computeCost(path, start_point):
+    
+    cost = 0
+    init_point = start_point
+
+    for i in range (0, len(path)):
+        curr_point = path.pop(0)
+        if ((init_point.x - curr_point.x == 0) or (init_point.y - curr_point.y == 0)):
+            #up or right
+            cost += 2
+        else:
+            #diagonally up
+            cost += 3
+        init_point = curr_point
+    
+    return cost
 
 def printResults(rows, cols, maze, visitedGoalPoint, cost):
     if (visitedGoalPoint == True):
@@ -77,9 +95,9 @@ def printResults(rows, cols, maze, visitedGoalPoint, cost):
 
     print("Total cost = ", cost)
 
+
+
 # successor function generation, generates valid points
-
-
 def successorFunction(rows, cols, element, goal_point, maze, visited):
     vertex = element  # really no need for this lol
     ls = []
@@ -96,15 +114,14 @@ def successorFunction(rows, cols, element, goal_point, maze, visited):
 
 
 def BFS(rows, cols, start_point, goal_point, maze):
+    
     visited = [[False]*cols for _ in range(rows)]
     queue = []
     path = []
-    parent = {}
     visited[start_point.x][start_point.y] = True
+    goal_found = False
 
     queue.append([Point(start_point.x, start_point.y)])
-
-    goal_found = False
 
     while queue:
 
@@ -112,14 +129,16 @@ def BFS(rows, cols, start_point, goal_point, maze):
         node = elementary_path[-1]
 
         if (node == goal_point):
-            # return path
+            #goal found
             goal_found = True
             findPath(maze, elementary_path)
-            printResults(rows, cols, maze, True, 0)
+            cost = computeCost(elementary_path, start_point)
+            printResults(rows, cols, maze, True, cost)
             break
 
         visited[node.x][node.y] = True
 
+        #generate possible positions
         (valid_moves) = successorFunction(
             rows, cols, node, goal_point, maze, visited)
 
