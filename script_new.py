@@ -154,6 +154,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
 def DFS(rows, cols, start_point, goal_point, maze,depth):
     visited = [[False]*cols for _ in range(rows)]
     cost = 0
+    localDepth = 0
     stack = []
     new_path = []
     new_path.append([])
@@ -164,7 +165,7 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
 
     stack.append([Point(start_point.x, start_point.y)])
 
-    while stack:
+    while stack and localDepth!=depth:
         elementary_path = stack.pop(0)
         node = elementary_path[-1]
 
@@ -180,27 +181,38 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
 
         # generate possible positions
         (valid_moves) = successorFunction(rows, cols, node, goal_point, maze, visited)
-
-        i=0
-        for obj in valid_moves:
-            new_path[i] = list(elementary_path)
-            new_path[i].append(obj)
-            i+=1
-        length = i
-        for x in range(length):
-            stack.insert(0,new_path[length-x-1])
+        if len(valid_moves)>0:
+            localDepth+=1
+            i=0
+            for obj in valid_moves:
+                new_path[i] = list(elementary_path)
+                new_path[i].append(obj)
+                i+=1
+            length = i
+            for x in range(length):
+                stack.insert(0,new_path[length-x-1])
+        else:
+            localDepth-=1
+            
 
     # search ended, goal not found
-    if (goal_found == False):
+    if (goal_found == False and depth==-1):
         print("Goal not found!")
+    elif (goal_found):
+        return True
+    else:
+        return False
 
 #Iterative deepening function, uses DFS with fixed depth
 def iterativeDeepening(rows,cols,start_point,goal_point,maze):
     depth = 1
+    goal_found = False
     originalMaze = copy.deepcopy(maze)
-    while depth!=20:
-        DFS(rows,cols,start_point,goal_point,originalMaze,depth)
+    while depth!=23 and goal_found == False:
+        goal_found = DFS(rows,cols,start_point,goal_point,originalMaze,depth)
         depth+=1
+    if  not goal_found:
+        print("Goal not found!")
 
 # main program
 (rows, cols, start_point, goal_point, maze) = retrieveData()
@@ -210,8 +222,8 @@ originalMaze = copy.deepcopy(maze)
 input("\nPress Enter to find path using DFS")
 DFS(rows,cols,start_point,goal_point,maze,-1)
 
-# input("Press Enter to find path using iterative deepening.")
-# (maze,visitedGoalPoint,cost) = iterativeDeepening(rows,cols,start_point,goal_point,originalMaze)
+input("\nPress Enter to find path using iterative deepening.")
+iterativeDeepening(rows,cols,start_point,goal_point,originalMaze)
 
 input("\nPress Enter to find path using BFS.")
 BFS(rows, cols, start_point, goal_point, originalMaze)
