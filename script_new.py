@@ -124,9 +124,11 @@ def BFS(rows, cols, start_point, goal_point, maze):
     queue.append(x)
 
     while queue:
-
+        #####STATE CONFIGURATION######## 
         elementary_path = queue.pop(0)
         node = elementary_path[-1][0]
+        currDepth = -1
+        ################################
 
         if (node == goal_point):
             # goal found
@@ -172,10 +174,11 @@ def DFS(rows, cols, start_point, goal_point, maze, depth):
     #stack.append([Point(start_point.x, start_point.y)],currDepth)
 
     while stack:
+        #####STATE CONFIGURATION########  
         elementary_path = stack.pop(0)
         node = elementary_path[-1][0]
         currDepth = elementary_path[-1][1]
-
+        ################################
 
         if (node == goal_point):
             # goal found
@@ -220,7 +223,7 @@ def iterativeDeepening(rows,cols,start_point,goal_point,maze):
         print("Goal not found!")
 
 
-# main program
+#main program
 (rows, cols, start_point, goal_point, maze) = retrieveData()
 
 originalMaze = copy.deepcopy(maze)
