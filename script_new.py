@@ -17,7 +17,6 @@ class Point:
             return NotImplemented
         return self.x == other.x and self.y == other.y
 
-
 # File reading
 def retrieveData():
     fileobj = open("grid.txt", "r")
@@ -162,12 +161,21 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
     new_path.append([])
     visited[start_point.x][start_point.y] = True
     goal_found = False
+    backTrack = False
 
     stack.append([Point(start_point.x, start_point.y)])
 
-    while stack and localDepth!=depth:
+    while stack:
         elementary_path = stack.pop(0)
         node = elementary_path[-1]
+        # if len(stack)!=0 and depth!=-1:
+        #     localDepth-=1
+        if backTrack and depth!=-1:
+            localDepth-=1
+        backTrack=False
+        if localDepth==depth:
+            break
+
 
         if (node == goal_point):
             # goal found
@@ -181,7 +189,17 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
 
         # generate possible positions
         (valid_moves) = successorFunction(rows, cols, node, goal_point, maze, visited)
-        if len(valid_moves)>0:
+        if depth==-1:
+            i=0
+            for obj in valid_moves:
+                new_path[i] = list(elementary_path)
+                new_path[i].append(obj)
+                i+=1
+            length = i
+            for x in range(length):
+                stack.insert(0,new_path[length-x-1])
+       
+        elif len(valid_moves)>0 and localDepth<depth:
             localDepth+=1
             i=0
             for obj in valid_moves:
@@ -191,8 +209,8 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
             length = i
             for x in range(length):
                 stack.insert(0,new_path[length-x-1])
-        else:
-            localDepth-=1
+        else: 
+            backTrack = True
             
 
     # search ended, goal not found
@@ -203,16 +221,18 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
     else:
         return False
 
+
 #Iterative deepening function, uses DFS with fixed depth
 def iterativeDeepening(rows,cols,start_point,goal_point,maze):
     depth = 1
     goal_found = False
     originalMaze = copy.deepcopy(maze)
-    while depth!=23 and goal_found == False:
+    while depth!=22 and goal_found == False:
         goal_found = DFS(rows,cols,start_point,goal_point,originalMaze,depth)
         depth+=1
     if  not goal_found:
         print("Goal not found!")
+
 
 # main program
 (rows, cols, start_point, goal_point, maze) = retrieveData()
