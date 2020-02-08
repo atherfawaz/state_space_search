@@ -17,6 +17,7 @@ class Point:
             return NotImplemented
         return self.x == other.x and self.y == other.y
 
+
 # File reading
 def retrieveData():
     fileobj = open("grid.txt", "r")
@@ -56,7 +57,7 @@ def retrieveData():
 
 
 # Find path taken to reach goal during searching algorithms
-def findPath(maze, path):
+def plotPath(maze, path):
     for obj in path:
         maze[obj[0].x][obj[0].y] = '*'
     start = path.pop(0)
@@ -130,7 +131,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
         if (node == goal_point):
             # goal found
             goal_found = True
-            findPath(maze, elementary_path)
+            plotPath(maze, elementary_path)
             cost = computeCost(elementary_path, start_point)
             printResults(rows, cols, maze, True, cost)
             break
@@ -179,7 +180,7 @@ def DFS(rows, cols, start_point, goal_point, maze, depth):
         if (node == goal_point):
             # goal found
             goal_found = True
-            findPath(maze, elementary_path)
+            plotPath(maze, elementary_path)
             cost = computeCost(elementary_path, start_point)
             printResults(rows, cols, maze, True, cost)
             break
@@ -188,17 +189,7 @@ def DFS(rows, cols, start_point, goal_point, maze, depth):
 
         # generate possible positions
         (valid_moves) = successorFunction(rows, cols, node, goal_point, maze, visited)
-        if depth==-1:
-            i=0
-            for obj in valid_moves:
-                new_path[i] = list(elementary_path)
-                new_path[i].append([obj,currDepth+1])
-                i+=1
-            length = i
-            for x in range(length):
-                stack.insert(0,new_path[length-x-1])
-       
-        elif (len(valid_moves)>0 and currDepth<depth):
+        if (currDepth<depth or depth == -1):
             i=0
             for obj in valid_moves:
                 new_path[i] = list(elementary_path)
