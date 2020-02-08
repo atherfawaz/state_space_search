@@ -55,12 +55,12 @@ def retrieveData():
         return (rows, cols, start_point, goal_point, maze)
 
 
-# Find path taken to reach goal during BFS
+# Find path taken to reach goal during searching algorithms
 def findPath(maze, path):
     for obj in path:
-        maze[obj.x][obj.y] = '*'
+        maze[obj[0].x][obj[0].y] = '*'
     start = path.pop(0)
-    maze[start.x][start.y] = 'S'
+    maze[start[0].x][start[0].y] = 'S'
 
 
 # Takes a path and computes its cost
@@ -71,13 +71,13 @@ def computeCost(path, start_point):
 
     for i in range(0, len(path)):
         curr_point = path.pop(0)
-        if ((init_point.x - curr_point.x == 0) or (init_point.y - curr_point.y == 0)):
+        if ((init_point.x - curr_point[0].x == 0) or (init_point.y - curr_point[0].y == 0)):
             #up or right
             cost += 2
         else:
             # diagonally up
             cost += 3
-        init_point = curr_point
+        init_point = curr_point[0]
 
     return cost
 
@@ -115,16 +115,17 @@ def BFS(rows, cols, start_point, goal_point, maze):
 
     visited = [[False]*cols for _ in range(rows)]
     queue = []
-    path = []
     visited[start_point.x][start_point.y] = True
     goal_found = False
 
-    queue.append([Point(start_point.x, start_point.y)])
+    x = []
+    x.append([Point(start_point.x, start_point.y),-1])
+    queue.append(x)
 
     while queue:
 
         elementary_path = queue.pop(0)
-        node = elementary_path[-1]
+        node = elementary_path[-1][0]
 
         if (node == goal_point):
             # goal found
@@ -141,7 +142,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
 
         for obj in valid_moves:
             new_path = list(elementary_path)
-            new_path.append(obj)
+            new_path.append([obj,-1])
             queue.append(new_path)
 
     # search ended, goal not found
@@ -153,7 +154,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
 def DFS(rows, cols, start_point, goal_point, maze,depth):
     visited = [[False]*cols for _ in range(rows)]
     cost = 0
-    localDepth = 0
+    currDepth = 0
     stack = []
     new_path = []
     new_path.append([])
@@ -161,20 +162,17 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
     new_path.append([])
     visited[start_point.x][start_point.y] = True
     goal_found = False
-    backTrack = False
 
-    stack.append([Point(start_point.x, start_point.y)])
+    x = []
+    x.append([Point(start_point.x,start_point.y),currDepth])
+    stack.append(x)
+
+    #stack.append([Point(start_point.x, start_point.y)],currDepth)
 
     while stack:
         elementary_path = stack.pop(0)
-        node = elementary_path[-1]
-        # if len(stack)!=0 and depth!=-1:
-        #     localDepth-=1
-        if backTrack and depth!=-1:
-            localDepth-=1
-        backTrack=False
-        if localDepth==depth:
-            break
+        node = elementary_path[-1][0]
+        currDepth = elementary_path[-1][1]
 
 
         if (node == goal_point):
@@ -193,25 +191,21 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
             i=0
             for obj in valid_moves:
                 new_path[i] = list(elementary_path)
-                new_path[i].append(obj)
+                new_path[i].append([obj,currDepth+1])
                 i+=1
             length = i
             for x in range(length):
                 stack.insert(0,new_path[length-x-1])
        
-        elif len(valid_moves)>0 and localDepth<depth:
-            localDepth+=1
+        elif (len(valid_moves)>0 and currDepth<depth):
             i=0
             for obj in valid_moves:
                 new_path[i] = list(elementary_path)
-                new_path[i].append(obj)
+                new_path[i].append([obj,currDepth+1])
                 i+=1
             length = i
             for x in range(length):
                 stack.insert(0,new_path[length-x-1])
-        else: 
-            backTrack = True
-            
 
     # search ended, goal not found
     if (goal_found == False and depth==-1):
@@ -227,7 +221,7 @@ def iterativeDeepening(rows,cols,start_point,goal_point,maze):
     depth = 1
     goal_found = False
     originalMaze = copy.deepcopy(maze)
-    while depth!=22 and goal_found == False:
+    while depth!=15 and goal_found == False:
         goal_found = DFS(rows,cols,start_point,goal_point,originalMaze,depth)
         depth+=1
     if  not goal_found:
