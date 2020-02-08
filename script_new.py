@@ -138,7 +138,8 @@ def BFS(rows, cols, start_point, goal_point, maze):
         visited[node.x][node.y] = True
 
         # generate possible positions
-        (valid_moves) = successorFunction(rows, cols, node, goal_point, maze, visited)
+        (valid_moves) = successorFunction(
+            rows, cols, node, goal_point, maze, visited)
 
         for obj in valid_moves:
             new_path = list(elementary_path)
@@ -151,7 +152,7 @@ def BFS(rows, cols, start_point, goal_point, maze):
 
 
 # Function to find a path to goal using Depth-First Search
-def DFS(rows, cols, start_point, goal_point, maze,depth):
+def DFS(rows, cols, start_point, goal_point, maze, depth):
     visited = [[False]*cols for _ in range(rows)]
     cost = 0
     currDepth = 0
@@ -208,7 +209,7 @@ def DFS(rows, cols, start_point, goal_point, maze,depth):
                 stack.insert(0,new_path[length-x-1])
 
     # search ended, goal not found
-    if (goal_found == False and depth==-1):
+    if (goal_found == False and depth == -1):
         print("Goal not found!")
     elif (goal_found):
         return True
@@ -234,10 +235,10 @@ def iterativeDeepening(rows,cols,start_point,goal_point,maze):
 originalMaze = copy.deepcopy(maze)
 
 input("\nPress Enter to find path using DFS")
-DFS(rows,cols,start_point,goal_point,maze,-1)
+DFS(rows, cols, start_point, goal_point, maze, -1)
 
 input("\nPress Enter to find path using iterative deepening.")
-iterativeDeepening(rows,cols,start_point,goal_point,originalMaze)
+iterativeDeepening(rows, cols, start_point, goal_point, originalMaze)
 
 input("\nPress Enter to find path using BFS.")
 BFS(rows, cols, start_point, goal_point, originalMaze)
