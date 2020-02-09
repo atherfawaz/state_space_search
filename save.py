@@ -17,16 +17,6 @@ class Point:
             return NotImplemented
         return self.x == other.x and self.y == other.y
 
-# State class that stores a particular state
-class State:
-    elementary_path = []
-    node = Point(-1,-1)
-    currDepth = -1
-
-    def __init__(self, path, depth, node):
-        self.currDepth = depth
-        self.elementary_path = path
-        self.node = node
 
 # File reading
 def retrieveData():
@@ -129,43 +119,33 @@ def BFS(rows, cols, start_point, goal_point, maze):
     visited[start_point.x][start_point.y] = True
     goal_found = False
 
-    #dummy state
-    state = State([], -1, Point(-1,-1))
-
     x = []
     x.append([Point(start_point.x, start_point.y),-1])
     queue.append(x)
 
     while queue:
-
-        #state variables
-        state.currDepth = -1
-        state.elementary_path = queue.pop(0)
-        state.node = state.elementary_path[-1][0]
-        #state variables
-
         #####STATE CONFIGURATION######## 
-        #elementary_path = queue.pop(0)
-        #node = elementary_path[-1][0]
-        #currDepth = -1
+        elementary_path = queue.pop(0)
+        node = elementary_path[-1][0]
+        currDepth = -1
         ################################
 
-        if (state.node == goal_point):
+        if (node == goal_point):
             # goal found
             goal_found = True
-            plotPath(maze, state.elementary_path)
-            cost = computeCost(state.elementary_path, start_point)
+            plotPath(maze, elementary_path)
+            cost = computeCost(elementary_path, start_point)
             printResults(rows, cols, maze, True, cost)
             break
 
-        visited[state.node.x][state.node.y] = True
+        visited[node.x][node.y] = True
 
         # generate possible positions
         (valid_moves) = successorFunction(
-            rows, cols, state.node, goal_point, maze, visited)
+            rows, cols, node, goal_point, maze, visited)
 
         for obj in valid_moves:
-            new_path = list(state.elementary_path)
+            new_path = list(elementary_path)
             new_path.append([obj,-1])
             queue.append(new_path)
 
@@ -187,9 +167,6 @@ def DFS(rows, cols, start_point, goal_point, maze, depth):
     visited[start_point.x][start_point.y] = True
     goal_found = False
 
-    #dummy state
-    state = State([], -1, Point(-1,-1))
-
     x = []
     x.append([Point(start_point.x,start_point.y),currDepth])
     stack.append(x)
@@ -197,37 +174,30 @@ def DFS(rows, cols, start_point, goal_point, maze, depth):
     #stack.append([Point(start_point.x, start_point.y)],currDepth)
 
     while stack:
-
-        #state variables
-        state.elementary_path = stack.pop(0)
-        state.node = state.elementary_path[-1][0]
-        state.currDepth = state.elementary_path[-1][-1]
-        #state variables
-
         #####STATE CONFIGURATION########  
-        #elementary_path = stack.pop(0)
-        #node = elementary_path[-1][0]
-        #currDepth = elementary_path[-1][1]
+        elementary_path = stack.pop(0)
+        node = elementary_path[-1][0]
+        currDepth = elementary_path[-1][1]
         ################################
 
-        if (state.node == goal_point):
+        if (node == goal_point):
             # goal found
             goal_found = True
-            plotPath(maze, state.elementary_path)
-            cost = computeCost(state.elementary_path, start_point)
+            plotPath(maze, elementary_path)
+            cost = computeCost(elementary_path, start_point)
             printResults(rows, cols, maze, True, cost)
             break
 
-        visited[state.node.x][state.node.y] = True
+        visited[node.x][node.y] = True
 
         # generate possible positions
-        (valid_moves) = successorFunction(rows, cols, state.node, goal_point, maze, visited)
-        if (state.currDepth < depth or depth == -1):
+        (valid_moves) = successorFunction(rows, cols, node, goal_point, maze, visited)
+        if (currDepth<depth or depth == -1):
             i=0
             for obj in valid_moves:
-                new_path[i] = list(state.elementary_path)
-                new_path[i].append([obj,state.currDepth + 1])
-                i += 1
+                new_path[i] = list(elementary_path)
+                new_path[i].append([obj,currDepth+1])
+                i+=1
             length = i
             for x in range(length):
                 stack.insert(0,new_path[length-x-1])
@@ -258,11 +228,11 @@ def iterativeDeepening(rows,cols,start_point,goal_point,maze):
 
 originalMaze = copy.deepcopy(maze)
 
-input("\nPress Enter to find path using Depth-First Search")
+input("\nPress Enter to find path using DFS")
 DFS(rows, cols, start_point, goal_point, maze, -1)
 
-input("\nPress Enter to find path using Iterative Deepening.")
+input("\nPress Enter to find path using iterative deepening.")
 iterativeDeepening(rows, cols, start_point, goal_point, originalMaze)
 
-input("\nPress Enter to find path using Breadth-First Search")
+input("\nPress Enter to find path using BFS.")
 BFS(rows, cols, start_point, goal_point, originalMaze)
