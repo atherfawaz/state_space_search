@@ -160,7 +160,9 @@ __version__ = "5.0"
 #     Added ability to set text atttributes.
 #     Added Entry boxes.
 
-import time, os, sys
+import time
+import os
+import sys
 
 try:  # import as appropriate for 2.x vs. 3.x
     import tkinter as tk
@@ -233,7 +235,8 @@ class GraphWin(tk.Canvas):
         self.closed = False
         master.lift()
         self.lastKey = ""
-        if autoflush: _root.update()
+        if autoflush:
+            _root.update()
 
     def __repr__(self):
         if self.isClosed():
@@ -268,7 +271,8 @@ class GraphWin(tk.Canvas):
     def close(self):
         """Close the window"""
 
-        if self.closed: return
+        if self.closed:
+            return
         self.closed = True
         self.master.destroy()
         self.__autoflush()
@@ -310,7 +314,8 @@ class GraphWin(tk.Canvas):
         self.mouseY = None
         while self.mouseX == None or self.mouseY == None:
             self.update()
-            if self.isClosed(): raise GraphicsError("getMouse in closed window")
+            if self.isClosed():
+                raise GraphicsError("getMouse in closed window")
             time.sleep(.1)  # give up thread
         x, y = self.toWorld(self.mouseX, self.mouseY)
         self.mouseX = None
@@ -336,7 +341,8 @@ class GraphWin(tk.Canvas):
         self.lastKey = ""
         while self.lastKey == "":
             self.update()
-            if self.isClosed(): raise GraphicsError("getKey in closed window")
+            if self.isClosed():
+                raise GraphicsError("getKey in closed window")
             time.sleep(.1)  # give up thread
 
         key = self.lastKey
@@ -469,14 +475,15 @@ class GraphicsObject:
         self._reconfig("width", width)
 
     def draw(self, graphwin):
-
         """Draw the object in graphwin, which should be a GraphWin
         object.  A GraphicsObject may only be drawn into one
         window. Raises an error if attempt made to draw an object that
         is already visible."""
 
-        if self.canvas and not self.canvas.isClosed(): raise GraphicsError(OBJ_ALREADY_DRAWN)
-        if graphwin.isClosed(): raise GraphicsError("Can't draw to closed window")
+        if self.canvas and not self.canvas.isClosed():
+            raise GraphicsError(OBJ_ALREADY_DRAWN)
+        if graphwin.isClosed():
+            raise GraphicsError("Can't draw to closed window")
         self.canvas = graphwin
         self.id = self._draw(graphwin, self.config)
         graphwin.addItem(self)
@@ -485,11 +492,11 @@ class GraphicsObject:
         return self
 
     def undraw(self):
-
         """Undraw the object (i.e. hide it). Returns silently if the
         object is not currently drawn."""
 
-        if not self.canvas: return
+        if not self.canvas:
+            return
         if not self.canvas.isClosed():
             self.canvas.delete(self.id)
             self.canvas.delItem(self)
@@ -499,7 +506,6 @@ class GraphicsObject:
         self.id = None
 
     def move(self, dx, dy):
-
         """move object dx units in x direction and dy units in y
         direction"""
 
