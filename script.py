@@ -1,8 +1,10 @@
 # State Space Search
+import copy
+import graphics
+from graphics import *
+
 
 # Point class to store coordinates of states
-
-
 class Point:
     x = -1
     y = -1
@@ -17,8 +19,22 @@ class Point:
             return NotImplemented
         return self.x == other.x and self.y == other.y
 
+# State class that stores a particular state
+
+
+class State:
+    elementary_path = []
+    node = Point(-1, -1)
+    currDepth = -1
+
+    def __init__(self, path, depth, node):
+        self.currDepth = depth
+        self.elementary_path = path
+        self.node = node
 
 # File reading
+
+
 def retrieveData():
     fileobj = open("grid.txt", "r")
     if (fileobj.mode == 'r'):
@@ -55,41 +71,109 @@ def retrieveData():
         fileobj.close()
         return (rows, cols, start_point, goal_point, maze)
 
-# Find path taken to reach goal during BFS
 
-
-def findPath(maze, path):
+# Find path taken to reach goal during searching algorithms
+def plotPath(maze, path):
     for obj in path:
-        maze[obj.x][obj.y] = '*'
+        maze[obj[0].x][obj[0].y] = '*'
+    start = path.pop(0)
+    maze[start[0].x][start[0].y] = 'S'
+    maze[goal_point.x][goal_point.y] = 'G'
 
 
-def printResults(rows, cols, maze):
-    for i in range(rows):
-        for j in range(cols):
-            print(maze[rows-i-1][j], end=" ")
-        print('\n')
+# Takes a path and computes its cost
+def computeCost(path, start_point):
 
-# Printing result
+    cost = 0
+    init_point = start_point
+
+    for i in range(0, len(path)):
+        curr_point = path.pop(0)
+        if ((init_point.x - curr_point[0].x == 0) or (init_point.y - curr_point[0].y == 0)):
+            #up or right
+            cost += 2
+        else:
+            # diagonally up
+            cost += 3
+        init_point = curr_point[0]
+
+    return cost
 
 
-def printResults(rows, cols, maze, visitedGoalPoint, cost):
-    if (visitedGoalPoint == True):
-        maze[goal_point.x][goal_point.y] = 'G'
-        for i in range(rows):
-            for j in range(cols):
-                print(maze[rows-i-1][j], end=" ")
-            print('\n')
+def printResults(rows, cols, maze, cost, visitedGoalPoint, graphTitle):
+    win = GraphWin(graphTitle, 700, 700)
+    block_size = 35
+    start_x = 200
+    start_y = 100
+    starting_x = 600
+    starting_y = 210
+    startPointMessage = Text(graphics.Point(
+        575, 125), "Start index is [{}, {}]".format(start_point.x, start_point.y))
+    goalPointMessage = Text(graphics.Point(
+        575, 150), "Goal index is [{}, {}]".format(goal_point.x, goal_point.y))
+    completionMessage = Text(graphics.Point(575, 175), "Path exists!")
+    errorMessage = Text(graphics.Point(575, 175), "No path exists!")
+    costMessage = Text(graphics.Point(575, 200),
+                       "The cost for this path is {}".format(cost))
+    noteMessage = Text(graphics.Point(
+        575, 500), "Note: If goal and obstacle\n are overlapping, goal won't\n be visible.")
+
+    legendWord = Text(graphics.Point(575, 250), "Legend:")
+    legendWords = Text(graphics.Point(575, 350),
+                       "Start Point\n\nEnd Point\n\nPath\n\nObstacle")
+    blocky = Rectangle(graphics.Point(starting_x+(1*block_size), starting_y+(2*block_size)),
+                       graphics.Point(starting_x+(1*block_size)+block_size, starting_y+(2*block_size)+block_size))
+    blocky.setFill("yellow")
+    blocky2 = Rectangle(graphics.Point(starting_x+(1*block_size), starting_y+(3*block_size)),
+                        graphics.Point(starting_x+(1*block_size)+block_size, starting_y+(3*block_size)+block_size))
+    blocky2.setFill("green")
+    blocky3 = Rectangle(graphics.Point(starting_x+(1*block_size), starting_y+(4*block_size)),
+                        graphics.Point(starting_x+(1*block_size)+block_size, starting_y+(4*block_size)+block_size))
+    blocky3.setFill("blue")
+    blocky4 = Rectangle(graphics.Point(starting_x+(1*block_size), starting_y+(5*block_size)),
+                        graphics.Point(starting_x+(1*block_size)+block_size, starting_y+(5*block_size)+block_size))
+    blocky4.setFill("red")
+
+    for i in range(len(maze)):
+        for j in range(len(maze[i])):
+            block = Rectangle(graphics.Point(start_x + (j * block_size), start_y + (i * block_size)),
+                              graphics.Point(start_x + (j * block_size) + block_size, start_y + (i * block_size) + block_size))
+            if maze[rows-i-1][j] == 1:
+                block.setFill("red")
+            elif rows-i-1 == start_point.x and j == start_point.y:
+                block.setFill("yellow")
+            elif maze[rows-i-1][j] == '*':
+                block.setFill("blue")
+            elif rows-i-1 == goal_point.x and j == goal_point.y:
+                block.setFill("green")
+            block.draw(win)
+
+    blocky.draw(win)
+    blocky2.draw(win)
+    blocky3.draw(win)
+    blocky4.draw(win)
+    startPointMessage.draw(win)
+    goalPointMessage.draw(win)
+    noteMessage.draw(win)
+    legendWord.setStyle("bold")
+    legendWord.setTextColor("purple")
+    legendWord.draw(win)
+    legendWords.draw(win)
+    if (visitedGoalPoint):
+        completionMessage.setStyle("bold")
+        completionMessage.draw(win)
+        costMessage.draw(win)
     else:
-        print("Failure! Path not found from start point to goal.")
+        errorMessage.setStyle("bold")
+        errorMessage.draw(win)
 
-    print("Total cost = ", cost)
 
 # successor function generation, generates valid points
-
-
 def successorFunction(rows, cols, element, goal_point, maze, visited):
-    vertex = element #really no need for this lol
+
+    vertex = element  # really no need for this lol
     ls = []
+    # our personal priority, down, right, diagonal (right,down)
     if (vertex.x + 1 < rows and visited[vertex.x + 1][vertex.y] == False and maze[vertex.x+1][vertex.y] == 0):
         # valid
         ls.append(Point(vertex.x + 1, vertex.y))
@@ -103,94 +187,142 @@ def successorFunction(rows, cols, element, goal_point, maze, visited):
 
 
 def BFS(rows, cols, start_point, goal_point, maze):
+
     visited = [[False]*cols for _ in range(rows)]
     queue = []
-    path = []
     visited[start_point.x][start_point.y] = True
-    queue.append(Point(start_point.x, start_point.y))
     goal_found = False
-    counter = 0
+
+    # dummy state
+    state = State([], -1, Point(-1, -1))
+
+    x = []
+    x.append([Point(start_point.x, start_point.y), -1])
+    queue.append(x)
 
     while queue:
-        counter = counter + 1
-        element = queue.pop(0)
-        if (element == goal_point):
-            # found
+
+        # state variables
+        state.currDepth = -1
+        state.elementary_path = queue.pop(0)
+        state.node = state.elementary_path[-1][0]
+        # state variables
+
+        if (state.node == goal_point):
+            # goal found
             goal_found = True
-            findPath(maze, path) ##TRACE PATH TAKEN FIX
-            printResults(rows, cols, maze, True, 0)
-            print("Goal found!")
+            plotPath(maze, state.elementary_path)
+            cost = computeCost(state.elementary_path, start_point)
+            printResults(rows, cols, maze, cost, True, "BFS")
             break
 
-        visited[element.x][element.y] = True
+        visited[state.node.x][state.node.y] = True
 
+        # generate possible positions
         (valid_moves) = successorFunction(
-            rows, cols, element, goal_point, maze, visited)
-
-        #no valid moves, this means we backtrack?
-        if (len(valid_moves) == 0):
-            path.append(element)
-            print("Backtracknow")
+            rows, cols, state.node, goal_point, maze, visited)
 
         for obj in valid_moves:
-            visited[obj.x][obj.y] = True
-            queue.append(Point(obj.x, obj.y))
+            new_path = list(state.elementary_path)
+            new_path.append([obj, -1])
+            queue.append(new_path)
 
     # search ended, goal not found
     if (goal_found == False):
-        print("Goal not found!")
+        printResults(rows, cols, maze, 0, False, "BFS")
 
 
 # Function to find a path to goal using Depth-First Search
-def DFS(rows, cols, start_point, goal_point, maze):
+def DFS(rows, cols, start_point, goal_point, maze, depth):
     visited = [[False]*cols for _ in range(rows)]
     cost = 0
+    currDepth = 0
     stack = []
+    new_path = []
+    new_path.append([])
+    new_path.append([])
+    new_path.append([])
+    visited[start_point.x][start_point.y] = True
+    goal_found = False
 
-    vertex = start_point
-    stack.append(Point(vertex.x, vertex.y))
-    visited[(vertex.x)][vertex.y] = True
-    maze[(vertex.x)][vertex.y] = 'S'
+    # dummy state
+    state = State([], -1, Point(-1, -1))
 
-    while visited[goal_point.x][goal_point.y] != True:
-        if (vertex.x+1 < 14 and visited[vertex.x+1][vertex.y] == False and maze[vertex.x+1][vertex.y] == 0):
-            stack.append(Point(vertex.x+1, vertex.y))
-            vertex.x += 1
-            visited[vertex.x][vertex.y] = True
-            maze[vertex.x][vertex.y] = '*'
-            cost += 2
-            costInc = 2
-        elif (vertex.y+1 < 7 and visited[vertex.x][vertex.y+1] == False and maze[vertex.x][vertex.y+1] == 0):
-            stack.append(Point(vertex.x, vertex.y+1))
-            vertex.y += 1
-            visited[vertex.x][vertex.y] = True
-            maze[vertex.x][vertex.y] = '*'
-            cost += 2
-            costInc = 2
-        elif (vertex.x+1 < 14 and vertex.y+1 < 7 and visited[vertex.x+1][vertex.y+1] == False and maze[vertex.x+1][vertex.y+1] == 0):
-            stack.append(Point(vertex.x+1, vertex.y+1))
-            vertex.x += 1
-            vertex.y += 1
-            visited[vertex.x][vertex.y] = True
-            maze[vertex.x][vertex.y] = '*'
-            cost += 3
-            costInc = 3
-        else:
-            maze[vertex.x][vertex.y] = 0
-            if len(stack) == 0:
-                break
-            cost -= costInc
-            if (len(stack) != 0):
-                vertex = stack[-1]
-            stack = stack[:-1]
+    x = []
+    x.append([Point(start_point.x, start_point.y), currDepth])
+    stack.append(x)
 
-    return (maze, visited[goal_point.x][goal_point.y], cost)
+    #stack.append([Point(start_point.x, start_point.y)],currDepth)
+
+    while stack:
+
+        # state variables
+        state.elementary_path = stack.pop(0)
+        state.node = state.elementary_path[-1][0]
+        state.currDepth = state.elementary_path[-1][-1]
+        # state variables
+
+        if (state.node == goal_point):
+            # goal found
+            goal_found = True
+            plotPath(maze, state.elementary_path)
+            cost = computeCost(state.elementary_path, start_point)
+            if depth == -1:
+                printResults(rows, cols, maze, cost, True, "DFS")
+            else:
+                printResults(rows, cols, maze, cost,
+                             True, "IterativeDeepening")
+            break
+
+        visited[state.node.x][state.node.y] = True
+
+        # generate possible positions
+        (valid_moves) = successorFunction(
+            rows, cols, state.node, goal_point, maze, visited)
+        if (state.currDepth < depth or depth == -1):
+            i = 0
+            for obj in valid_moves:
+                new_path[i] = list(state.elementary_path)
+                new_path[i].append([obj, state.currDepth + 1])
+                i += 1
+            length = i
+            for x in range(length):
+                stack.insert(0, new_path[length-x-1])
+
+    # search ended, goal not found
+    if (goal_found == False and depth == -1):
+        printResults(rows, cols, maze, 0, False, "DFS")
+    elif (goal_found):
+        return True
+    else:
+        return False
+
+
+# Iterative deepening function, uses DFS with fixed depth
+def iterativeDeepening(rows, cols, start_point, goal_point, maze):
+    depth = 1
+    goal_found = False
+    originalMaze = copy.deepcopy(maze)
+    while depth != 15 and goal_found == False:
+        goal_found = DFS(rows, cols, start_point,
+                         goal_point, originalMaze, depth)
+        depth += 1
+    if not goal_found:
+        printResults(rows, cols, maze, 0, False, "Iterative Deepening")
 
 
 # main program
 (rows, cols, start_point, goal_point, maze) = retrieveData()
 
-#(maze, visitedGoalPoint, cost) = DFS(rows, cols, start_point, goal_point, maze)
-#printResults(rows, cols, maze, visitedGoalPoint, cost)
+originalMaze = copy.deepcopy(maze)
 
-BFS(rows, cols, start_point, goal_point, maze)
+input("\nPress Enter to find path using Depth-First Search.")
+DFS(rows, cols, start_point, goal_point, maze, -1)
+
+input("\nPress Enter to find path using Iterative Deepening.")
+iterativeDeepening(rows, cols, start_point, goal_point, originalMaze)
+
+input("\nPress Enter to find path using Breadth-First Search.")
+BFS(rows, cols, start_point, goal_point, originalMaze)
+
+input("\nPress Enter to exit")
